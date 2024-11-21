@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>E. coli Gene Search - Autocomplete</title>
+
+  <!-- Include your custom CSS -->
+  <link rel="stylesheet" type="text/css" href="css/search_product.css" />
+
+  <!-- Include jQuery and jQuery UI for Autocomplete functionality -->
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script type="text/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+</head>
+
+<body id="main">
+  <h1>E. coli Gene Search</h1>
+
+  <!-- Simple search form with an input field -->
+  <form name="gene_search" id="gene_search" action="">
+    <input name="search_term" id="search_term" type="search" value="" autofocus="autofocus" placeholder="Enter a search term" />
+  </form>
+
+  <section id='results'>
+    <p><span id='match_count'>0</span> match(es) found.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Locus tag</th>
+          <th>Product</th>
+        </tr>
+      </thead>
+      <tbody id="result_body">
+        <!-- This will be filled in by JavaScript when there are results -->
+      </tbody>
+    </table>
+  </section>
+
+  <script type="text/javascript">
+    $(document).ready(function() {
+      // jQuery Autocomplete for the search box
+      $("#search_term").autocomplete({
+        // Source is a function that makes an AJAX request to the server
+        source: function(request, response) {
+          $.ajax({
+            url: "search_product.cgi",  // This is the server script that will handle the search
+            dataType: "json",  // We expect JSON data back from the server
+            data: {
+              term: request.term  // Send the user's input (term) to the server
+            },
+            success: function(data) {
+              // Only return up to 5 results for the autocomplete suggestions
+              response(data.slice(0, 5));
+
+              // Update match count on the page
+              $("#match_count").text(data.length);
+
+              // Clear any previous results in the table
+              $("#result_body").empty();
+
+              // Add the new results to the table
+              data.forEach(function(item) {
+                $("#result_body").append("<tr><td>" + item.locus_tag + "</td><td>" + item.product + "</td></tr>");
+              });
+            }
+          });
+        },
+        minLength: 2  // Start searching when the user types at least 2 characters
+      });
+    });
+  </script>
+</body>
+</html>
+
